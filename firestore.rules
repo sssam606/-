@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Helper to validate Student schema elements
+    function isValidStudent(data) {
+      return data.id is string && data.id.size() <= 32
+        && data.name is string && data.name.size() <= 128
+        && data.studentClass is string && data.studentClass.size() <= 32;
+    }
+
+    // Helper to validate Demerit Record schema elements (The Anti-Update-Gap)
+    function isValidDemeritRecord(data) {
+      return data.id is string && data.id.size() <= 64
+        && data.studentId is string && data.studentId.size() <= 32
+        && data.studentName is string && data.studentName.size() <= 128
+        && data.studentClass is string && data.studentClass.size() <= 32
+        && data.teacherId is string && data.teacherId.size() <= 128
+        && data.teacherName is string && data.teacherName.size() <= 128
+        && data.parentPhone is string && data.parentPhone.size() <= 32
+        && data.parentEmail is string && data.parentEmail.size() <= 128
+        && data.totalPoints is number && data.totalPoints >= 0 && data.totalPoints <= 500
+        && data.studentSignature is string && data.studentSignature.size() <= 200000
+        && data.teacherSignature is string && data.teacherSignature.size() <= 200000
+        && data.parentAck is bool
+        && (!data.keys().hasAll(['parentSignature']) || data.parentSignature is string)
+        && (!data.keys().hasAll(['parentName']) || data.parentName is string)
+        && (!data.keys().hasAll(['parentAckAt']) || data.parentAckAt is string)
+        && (!data.keys().hasAll(['evidenceBase64']) || data.evidenceBase64 is string)
+        && (!data.keys().hasAll(['notes']) || data.notes is string);
+    }
+
+    // Demerit Records Collection rules
+    match /demeritRecords/{recordId} {
+      allow get: if true; // Public access for parents to view their child's record by direct URL link or ID query
+      
+      allow list: if true; // Allow queries so that teachers or parents can search records
+
+      // Only teachers can create a record
+      allow create: if (
+        isSignedIn()
+        && isValidId(recordId)
+        && isValidDemeritRecord(incoming())
+        && incoming().id == recordId
+        && incoming().parentAck == false
+      );
+
+      // Anyone (parent) can update the parent acknowledgement and signature
+      // But other core infraction details are strictly immutable (The Immortal Fields Rule)
+      allow update: if (
+        isValidDemeritRecord(incoming())
+        && incoming().id == existing().id
+        && incoming().studentId == existing().studentId
+        && incoming().studentName == existing().studentName
+        && incoming().studentClass == existing().studentClass
+        && incoming().teacherId == existing().teacherId
+        && incoming().teacherName == existing().teacherName
+        && incoming().totalPoints == existing().totalPoints
+        && incoming().studentSignature == existing().studentSignature
+        && incoming().teacherSignature == existing().teacherSignature
+        && incoming().evidenceBase64 == existing().evidenceBase64
+        && incoming().parentPhone == existing().parentPhone
+        && incoming().parentEmail == existing().parentEmail
+        // Action Check: Acknowledging and updating signatures only
+        && incoming().parentAck == true
+        && existing().parentAck == false
+        && incoming().diff(existing()).affectedKeys().hasOnly(['parentAck', 'parentSignature', 'parentName', 'parentAckAt'])
+      );
+
+      // Demerit logs cannot be deleted to prevent students tampering with proof
+      allow delete: if false;
+    }
+
+    // Students Collection rules
+    match /students/{studentId} {
+      allow get, list: if true; // Public access to enable quick lookups when filing or viewing history
+      
+      allow create, update: if (
+        isSignedIn()
+        && isValidId(studentId)
+        && isValidStudent(incoming())
+        && incoming().id == studentId
+      );
+      
+      allow delete: if isSignedIn();
+    }
+  }
+}

@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-blue-50: #f0f7ff;
+  --color-blue-100: #e0effe;
+  --color-blue-200: #bae3fd;
+  --color-blue-300: #7dd0fc;
+  --color-blue-400: #38bdf8;
+  --color-blue-500: #1a56bc; /* Majestic School Blue */
+  --color-blue-600: #123e85; /* Principal School Blue */
+  --color-blue-700: #0a2552; /* Strong School Blue */
+  --color-blue-800: #061733; 
+  --color-blue-900: #030a17;
+
+  --color-pink-50: #fff1f2;
+  --color-pink-100: #ffe4e6;
+  --color-pink-200: #fecdd3;
+  --color-pink-300: #fda4af;
+  --color-pink-400: #fb7185;
+  --color-pink-500: #f43f5e; /* Rose-Pink */
+  --color-pink-600: #e11d48; /* Accent Pink */
+  --color-pink-700: #be123c;
+  --color-pink-800: #9f1239;
+  --color-pink-900: #881337;
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}

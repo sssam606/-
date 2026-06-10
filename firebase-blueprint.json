@@ -1,0 +1,133 @@
+{
+  "entities": {
+    "demeritRecord": {
+      "title": "DemeritRecord",
+      "description": "A record of a student's behavioral infraction and demerit point scoring",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Infraction record ID"
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Student identification number"
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Student fullname"
+        },
+        "studentClass": {
+          "type": "string",
+          "description": "Student class or grade level"
+        },
+        "totalPoints": {
+          "type": "number",
+          "description": "Total demerit points calculated for selected offenses"
+        },
+        "teacherId": {
+          "type": "string",
+          "description": "ID of the teacher who logged the infraction"
+        },
+        "teacherName": {
+          "type": "string",
+          "description": "Name of the teacher"
+        },
+        "studentSignature": {
+          "type": "string",
+          "description": "Base64 png canvas signature of student"
+        },
+        "teacherSignature": {
+          "type": "string",
+          "description": "Base64 png canvas signature of teacher"
+        },
+        "parentSignature": {
+          "type": "string",
+          "description": "Base64 png canvas signature of parent"
+        },
+        "parentName": {
+          "type": "string",
+          "description": "Name of the parent who acknowledged the record"
+        },
+        "parentAck": {
+          "type": "boolean",
+          "description": "Parent acknowledgement status"
+        },
+        "parentAckAt": {
+          "type": "string",
+          "description": "Parent acknowledgement ISO timestamp"
+        },
+        "evidenceBase64": {
+          "type": "string",
+          "description": "Base64 format image evidence attached at time of infraction log"
+        },
+        "parentPhone": {
+          "type": "string",
+          "description": "Parent contact phone number for real-time notification"
+        },
+        "parentEmail": {
+          "type": "string",
+          "description": "Parent email address"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when the infraction was logged"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes about the incident"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "studentName",
+        "studentClass",
+        "totalPoints",
+        "teacherId",
+        "teacherName",
+        "studentSignature",
+        "teacherSignature",
+        "parentAck",
+        "parentPhone",
+        "parentEmail",
+        "createdAt"
+      ]
+    },
+    "student": {
+      "title": "Student",
+      "description": "Information about a student registered in the school roster",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique student identification number (e.g. 15658)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Student first and last name"
+        },
+        "studentClass": {
+          "type": "string",
+          "description": "Student registered class (e.g. ม.6/1)"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "studentClass"
+      ]
+    }
+  },
+  "firestore": {
+    "/demeritRecords/{recordId}": {
+      "schema": "demeritRecord",
+      "description": "Database store containing student infraction logs and parent acknowledgements"
+    },
+    "/students/{studentId}": {
+      "schema": "student",
+      "description": "Persistent school roster storing all student coordinates"
+    }
+  }
+}
